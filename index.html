@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acadiana Cultural Center & Farm-Stay: Quest for Sustainability</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090d16;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .font-mono-code { font-family: 'Fira Code', monospace; }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.8); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 1); }
+
+        /* Level Theme Color Classes for Sidebar Cards */
+        .card-level-1 {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 58, 138, 0.85));
+            border: 2px solid #3b82f6;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
+        }
+        .card-level-2 {
+            background: linear-gradient(135deg, rgba(43, 22, 10, 0.95), rgba(120, 53, 15, 0.85));
+            border: 2px solid #f97316;
+            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.25);
+        }
+        .card-level-3 {
+            background: linear-gradient(135deg, rgba(6, 44, 23, 0.95), rgba(20, 83, 45, 0.85));
+            border: 2px solid #22c55e;
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.25);
+        }
+        .card-level-4 {
+            background: linear-gradient(135deg, rgba(4, 47, 46, 0.95), rgba(15, 118, 110, 0.85));
+            border: 2px solid #14b8a6;
+            box-shadow: 0 4px 20px rgba(20, 184, 166, 0.25);
+        }
+        .card-level-5 {
+            background: linear-gradient(135deg, rgba(46, 16, 101, 0.95), rgba(91, 33, 182, 0.85));
+            border: 2px solid #a855f7;
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.25);
+        }
+
+        /* Quest Items */
+        .quest-item {
+            transition: all 0.2s ease-in-out;
+        }
+        .quest-item:hover {
+            transform: translateX(4px);
+        }
+        .quest-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid #f59e0b;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col overflow-hidden bg-slate-950">
+
+    <!-- TOP HEADER & HUD BAR -->
+    <header class="h-16 bg-slate-900/90 border-b border-slate-800 px-4 flex items-center justify-between z-30 shrink-0 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-amber-500/20 font-cinzel">
+                LA
+            </div>
+            <div>
+                <h1 class="font-cinzel text-lg font-bold text-amber-400 leading-none">Acadiana Quest Engine</h1>
+                <p class="text-xs text-slate-400 mt-0.5">Cajun Cultural Center & Farm-Stay Roadmap</p>
+            </div>
+        </div>
+
+        <!-- STATS & CONTROLS HUD -->
+        <div class="flex items-center gap-4">
+            <!-- XP Progress -->
+            <div class="hidden sm:flex flex-col w-32">
+                <div class="flex justify-between text-xs font-semibold mb-1">
+                    <span class="text-slate-400">XP</span>
+                    <span id="xp-text" class="text-amber-400">0 / 500 XP</span>
+                </div>
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                    <div id="xp-bar" class="h-full bg-gradient-to-r from-amber-500 to-yellow-400 w-0 transition-all duration-500"></div>
+                </div>
+            </div>
+
+            <!-- Capital Funding HUD -->
+            <div class="bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-lg hidden md:flex items-center gap-3">
+                <i class="fa-solid text-emerald-400 fa-building-columns"></i>
+                <div class="text-xs">
+                    <div class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Fund Balance</div>
+                    <div id="hud-balance" class="text-emerald-400 font-mono-code font-bold">$0</div>
+                </div>
+            </div>
+
+            <!-- Module Toggles -->
+            <div class="flex items-center gap-1.5 bg-slate-950 border border-slate-800 p-1 rounded-lg">
+                <button id="toggle-ledger-btn" onclick="toggleLedgerPanel()" class="px-2.5 py-1 rounded bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 text-xs font-medium flex items-center gap-1.5 transition-all" title="Toggle Ledger Module">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span class="hidden lg:inline">Ledger</span>
+                </button>
+                <button id="toggle-badges-btn" onclick="toggleBadgesPanel()" class="px-2.5 py-1 rounded bg-amber-950/60 hover:bg-amber-900 text-amber-200 text-xs font-medium flex items-center gap-1.5 transition-all" title="Toggle Badges Module">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span class="hidden lg:inline">Badges</span>
+                </button>
+                <button id="toggle-audio-btn" onclick="toggleAudio()" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Toggle Sound SFX">
+                    <i id="audio-icon" class="fa-solid fa-volume-high text-amber-400 text-xs"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN BODY CONTAINER -->
+    <div class="flex-1 flex overflow-hidden relative">
+
+        <!-- DYNAMIC BACKGROUND CANVAS -->
+        <canvas id="stageCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+        <!-- LEFT SIDEBAR: LEVEL STAGES & QUESTS (35% Width) -->
+        <aside class="w-full md:w-[420px] lg:w-[460px] bg-slate-950/90 border-r border-slate-800 flex flex-col z-10 shrink-0 backdrop-blur-md">
+            
+            <div class="p-3 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Campaign Levels & Quests</span>
+                <span class="text-xs text-amber-400 font-mono-code" id="completion-counter">0/10 Quests Approved</span>
+            </div>
+
+            <div id="levels-container" class="flex-1 overflow-y-auto p-3 space-y-4">
+                <!-- LEVELS & QUEST CARDS INJECTED BY JAVASCRIPT -->
+            </div>
+        </aside>
+
+        <!-- RIGHT PANEL: DASHBOARD & ACTION DOSSIER (65% Width) -->
+        <main class="flex-1 flex flex-col z-10 overflow-hidden relative bg-slate-950/40 backdrop-blur-[2px]">
+            
+            <!-- STAGE HUD BANNER -->
+            <div id="stage-banner" class="p-4 border-b border-slate-800/80 bg-slate-900/80 flex items-center justify-between backdrop-blur-md">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span id="banner-level-tag" class="px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider bg-blue-900/80 text-blue-300 border border-blue-500/40">
+                            Level 1 Stage
+                        </span>
+                        <span id="banner-status-tag" class="px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">
+                            Status: Action Required
+                        </span>
+                    </div>
+                    <h2 id="banner-title" class="text-xl font-bold font-cinzel text-slate-100 mt-1">Legal & Administrative Setup</h2>
+                    <p id="banner-subtitle" class="text-xs text-slate-400">Establish the non-profit parent entity, SAM.gov UEI registration, and tax exemption.</p>
+                </div>
+                <div class="text-right hidden lg:block">
+                    <span class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Funding Goal</span>
+                    <div id="banner-funding" class="text-sm font-mono-code font-bold text-emerald-400">$0 / $50,000 Grants</div>
+                </div>
+            </div>
+
+            <!-- CONTENT BODY: DOSSIER, LEDGER & BADGES -->
+            <div class="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
+
+                <!-- IN-LINE ACTION DOSSIER CARD -->
+                <div id="action-dossier-card" class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-5 shadow-2xl backdrop-blur-lg">
+                    <div class="flex items-start justify-between border-b border-slate-800 pb-3 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div id="dossier-icon" class="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/40">
+                                <i class="fa-solid fa-file-signature"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h3 id="dossier-title" class="text-lg font-bold text-slate-100">Select a Quest Task</h3>
+                                    <span id="dossier-quest-status" class="text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-amber-950 text-amber-400 border border-amber-800">
+                                        Action Required
+                                    </span>
+                                </div>
+                                <p id="dossier-category" class="text-xs text-amber-400 font-mono-code">Click any quest item in the left menu to display step-by-step instructions.</p>
+                            </div>
+                        </div>
+                        <button onclick="hideDossierDetails()" class="text-xs text-slate-400 hover:text-slate-200 bg-slate-800 px-2.5 py-1 rounded border border-slate-700 transition-colors">
+                            <i class="fa-solid fa-eye-slash mr-1"></i> Hide Details
+                        </button>
+                    </div>
+
+                    <!-- ACTION ITEMS WITH EMBEDDED PROGRESS BARS -->
+                    <div id="action-items-container" class="space-y-4 mb-5">
+                        <!-- MAIN QUEST ITEMS & OBJECTIVES INJECTED HERE -->
+                    </div>
+
+                    <!-- GUIDANCE OVERVIEW -->
+                    <div id="dossier-body" class="text-xs text-slate-400 border-t border-slate-800 pt-3 italic">
+                        Select an action quest from the left panel to review guidance details.
+                    </div>
+                </div>
+
+                <!-- OPEN LEDGER ENGINE PANEL (COLLAPSIBLE) -->
+                <div id="ledger-panel" class="bg-slate-900/90 border border-indigo-900/80 rounded-xl p-5 shadow-2xl backdrop-blur-lg">
+                    <div class="flex items-center justify-between border-b border-indigo-900/60 pb-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-scale-balanced text-indigo-400 text-lg"></i>
+                            <h3 class="text-base font-bold text-indigo-200">Open-Ledger Transparency Engine</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="resetLedger()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded border border-slate-700 transition-colors">
+                                <i class="fa-solid fa-rotate-right mr-1"></i> Reset Ledger
+                            </button>
+                            <button onclick="toggleLedgerPanel()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 px-2 py-1 rounded transition-colors" title="Close Ledger">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ADD LEDGER TRANSACTION FORM -->
+                    <form id="ledger-form" onsubmit="handleAddTransaction(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
+                        <input type="text" id="tx-desc" placeholder="Transaction Description" required class="bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <input type="number" id="tx-amount" placeholder="Amount ($)" required class="bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <select id="tx-type" class="bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                            <option value="grant">Grant Revenue (+)</option>
+                            <option value="lodging">Airbnb Revenue (+)</option>
+                            <option value="workshop">Workshop Fee (+)</option>
+                            <option value="expense">Operating Expense (-)</option>
+                        </select>
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded px-3 py-1.5 transition-colors flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-plus"></i> Post to Ledger
+                        </button>
+                    </form>
+
+                    <!-- LEDGER TRANSACTIONS TABLE -->
+                    <div class="overflow-x-auto max-h-56 overflow-y-auto rounded border border-slate-800">
+                        <table class="w-full text-left text-xs font-mono-code">
+                            <thead class="bg-slate-950 text-slate-400 sticky top-0 border-b border-slate-800">
+                                <tr>
+                                    <th class="p-2.5">Date</th>
+                                    <th class="p-2.5">Description</th>
+                                    <th class="p-2.5">Category</th>
+                                    <th class="p-2.5 text-right">Amount</th>
+                                    <th class="p-2.5 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ledger-table-body" class="divide-y divide-slate-800/60 bg-slate-900/50">
+                                <!-- TRANSACTIONS INJECTED HERE -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TROPHY & BADGES CABINET (COLLAPSIBLE) -->
+                <div id="badges-panel" class="bg-slate-900/90 border border-amber-900/50 rounded-xl p-5 shadow-xl backdrop-blur-lg">
+                    <div class="flex items-center justify-between border-b border-amber-900/40 pb-3 mb-3">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-amber-200 flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-amber-400"></i> Achievement Badges Cabinet
+                        </h3>
+                        <button onclick="toggleBadgesPanel()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 px-2 py-1 rounded transition-colors" title="Close Badges">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div id="badges-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3">
+                        <!-- BADGES INJECTED HERE -->
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT GAME & INTERACTION ENGINE -->
+    <script>
+        const GAME_DATA = {
+            xp: 0,
+            completedQuests: new Set(),
+            completedSubtasks: newSetWithSaved(),
+            currentLevelId: 1,
+            currentQuestId: null,
+            ledgerVisible: true,
+            badgesVisible: true,
+            audioEnabled: true,
+            ledger: [
+                { id: 'tx-1', date: '2026-02-15', desc: 'LDAF Specialty Crop Grant Deposit', category: 'grant', amount: 35000 },
+                { id: 'tx-2', date: '2026-03-01', desc: 'Cabin 1 Airbnb Booking - Weekend Stay', category: 'lodging', amount: 320 },
+                { id: 'tx-3', date: '2026-03-04', desc: 'Cajun Fiddle Workshop Registration Fees', category: 'workshop', amount: 450 },
+                { id: 'tx-4', date: '2026-03-10', desc: 'Hydroponic Nutrients & Seed Stock Supply', category: 'expense', amount: -650 }
+            ],
+            levels: [
+                {
+                    id: 1,
+                    title: "Level 1: Administrative & Governance",
+                    subtitle: "501(c)(3) Setup, SAM.gov UEI & IRS Compliance",
+                    cardClass: "card-level-1",
+                    fundingGoal: "$50,000",
+                    theme: "legal",
+                    quests: [
+                        {
+                            id: "q1_1",
+                            title: "Incorporate 501(c)(3) Louisiana Non-Profit",
+                            xp: 50,
+                            desc: "File Non-Profit Articles of Incorporation with the Louisiana Secretary of State.",
+                            actionItems: [
+                                {
+                                    title: "Draft Non-Profit Articles of Incorporation",
+                                    detail: "Name initial 3 board members and specify Louisiana non-profit purpose.",
+                                    substeps: [
+                                        "Select 3 founding directors residing in Louisiana to form the initial board.",
+                                        "Draft corporate name explicitly checking availability on geauxBIZ registry.",
+                                        "Write mission statement dedicated exclusively to Cajun cultural preservation."
+                                    ]
+                                },
+                                {
+                                    title: "Include IRS 501(c)(3) Mandatory Clauses",
+                                    detail: "Ensure Article IX includes tax-exempt purpose and strict dissolution provisions.",
+                                    substeps: [
+                                        "Incorporate exact IRS statutory language regarding exempt charitable purposes.",
+                                        "Add clause stating assets will be distributed to another 501(c)(3) upon dissolution."
+                                    ]
+                                },
+                                {
+                                    title: "File via geauxBIZ Portal ($75 fee)",
+                                    detail: "Submit digital charter and initial report with the Louisiana Secretary of State.",
+                                    substeps: [
+                                        "Log into geauxbiz.sos.la.gov using your state user account.",
+                                        "Upload signed Articles of Incorporation and pay $75 filing fee via credit card.",
+                                        "Download stamped State Filing Approved certificate for your records."
+                                    ]
+                                },
+                                {
+                                    title: "Adopt Corporate Bylaws & Conflict Policy",
+                                    detail: "Formally sign off on internal governance rules and conflict of interest guidelines.",
+                                    substeps: [
+                                        "Convene initial board meeting to review standard non-profit bylaws.",
+                                        "Sign and date the Conflict of Interest Disclosure Policy for all board members."
+                                    ]
+                                }
+                            ],
+                            guidance: "Ensure mandatory IRS 501(c)(3) dissolution language is included in Article IX of your corporate charter."
+                        },
+                        {
+                            id: "q1_2",
+                            title: "Register on SAM.gov & Secure UEI Number",
+                            xp: 50,
+                            desc: "Mandatory federal registration to receive USDA loans and federal grant awards.",
+                            actionItems: [
+                                {
+                                    title: "Obtain Employer Identification Number (EIN)",
+                                    detail: "Apply online via IRS.gov for instant corporate EIN assignment.",
+                                    substeps: [
+                                        "Access IRS.gov online EIN Assistant during operational hours.",
+                                        "Select 'View Additional Types -> Community or Non-Profit Corporation'.",
+                                        "Input corporate details and instantly download official EIN confirmation letter (CP 575)."
+                                    ]
+                                },
+                                {
+                                    title: "Create Individual SAM.gov Account",
+                                    detail: "Set up login.gov credentials and verify administrator identity.",
+                                    substeps: [
+                                        "Navigate to SAM.gov and click 'Sign In' via Login.gov.",
+                                        "Complete multi-factor authentication and identity verification steps."
+                                    ]
+                                },
+                                {
+                                    title: "Submit Entity Validation Details",
+                                    detail: "Provide official Lafayette Parish address matching your state incorporation.",
+                                    substeps: [
+                                        "Enter exact legal entity name and Lafayette Parish physical address.",
+                                        "Upload your stamped Articles of Incorporation as proof of entity existence."
+                                    ]
+                                },
+                                {
+                                    title: "Receive Unique Entity Identifier (UEI)",
+                                    detail: "Confirm active status and 12-character alphanumeric UEI code.",
+                                    substeps: [
+                                        "Wait for Federal Service Desk (FSD) validation review (approx. 3-5 days).",
+                                        "Retrieve your assigned 12-character alphanumeric UEI code from your SAM.gov workspace."
+                                    ]
+                                }
+                            ],
+                            guidance: "Upload proof of physical address matching your Lafayette Parish incorporation during SAM.gov validation."
+                        },
+                        {
+                            id: "q1_3",
+                            title: "Form Single-Member LLC Subsidiary",
+                            xp: 50,
+                            desc: "Establish a wholly-owned LLC to isolate commercial Airbnb lodging income from the non-profit parent.",
+                            actionItems: [
+                                {
+                                    title: "Draft LLC Articles of Organization",
+                                    detail: "Prepare commercial subsidiary charter designating 501(c)(3) parent as sole member.",
+                                    substeps: [
+                                        "Name the commercial LLC entity (e.g., 'Acadiana Heritage Stays LLC').",
+                                        "Designate the 501(c)(3) non-profit parent corporation as 100% sole member."
+                                    ]
+                                },
+                                {
+                                    title: "Submit LLC Filing on geauxBIZ",
+                                    detail: "Pay state filing fee and secure approved LLC certificate.",
+                                    substeps: [
+                                        "Submit Articles of Organization through geauxBIZ portal ($100 fee).",
+                                        "Save approved LLC certificate to corporate repository."
+                                    ]
+                                },
+                                {
+                                    title: "Execute Operating Agreement",
+                                    detail: "Establish tax-free dividend distribution rules flowing directly back into non-profit.",
+                                    substeps: [
+                                        "Draft Single-Member LLC operating agreement affirming tax pass-through to non-profit parent.",
+                                        "Sign agreement as authorized representative of the 501(c)(3) board."
+                                    ]
+                                }
+                            ],
+                            guidance: "Forming a Single-Member LLC owned entirely by your 501(c)(3) shields your non-profit tax status while allowing full commercial Airbnb lodging operations in Lafayette Parish."
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "Level 2: Community & Cultural Guilds",
+                    subtitle: "Acadiana Arts Partnerships & Workshop Framework",
+                    cardClass: "card-level-2",
+                    fundingGoal: "$25,000 Grants",
+                    theme: "cultural",
+                    quests: [
+                        {
+                            id: "q2_1",
+                            title: "Partner with Acadiana Center for the Arts (AcA)",
+                            xp: 60,
+                            desc: "Establish formal relationship for community arts & culture project grants.",
+                            actionItems: [
+                                {
+                                    title: "Schedule AcA Intake Meeting",
+                                    detail: "Meet with AcA Community Engagement Director to present cultural preservation scope.",
+                                    substeps: [
+                                        "Reach out via AcA community portal to book introductory meeting.",
+                                        "Prepare 1-page overview of proposed Cajun music workshops and French immersion circles."
+                                    ]
+                                },
+                                {
+                                    title: "Secure Local Musician Letters of Support",
+                                    detail: "Obtain letters from at least 3 traditional Lafayette Parish Cajun accordion/fiddle players.",
+                                    substeps: [
+                                        "Contact regional folk musicians and cultural tradition bearers.",
+                                        "Collect signed endorsement letters for your grant application packet."
+                                    ]
+                                },
+                                {
+                                    title: "Submit LCG Arts & Culture Grant Application",
+                                    detail: "Apply for community project grant funding ($5,000 ceiling).",
+                                    substeps: [
+                                        "Complete online grant application form via AcA grant portal.",
+                                        "Attach project budget, timeline, and musician support letters."
+                                    ]
+                                }
+                            ],
+                            guidance: "Submit project grant proposal for community Cajun French coffee hours (*Table Française*) and traditional accordion/fiddle instruction series."
+                        },
+                        {
+                            id: "q2_2",
+                            title: "Establish CODOFIL Cajun French Immersion Circle",
+                            xp: 60,
+                            desc: "Connect with CODOFIL to deliver youth and senior language workshops.",
+                            actionItems: [
+                                {
+                                    title: "Register as Official CODOFIL Regional Hub",
+                                    detail: "Complete state cultural partnership paperwork with Council for the Development of French in Louisiana.",
+                                    substeps: [
+                                        "Contact CODOFIL executive director regarding community hub status.",
+                                        "Submit organizational profile and educational mission statement."
+                                    ]
+                                },
+                                {
+                                    title: "Curate Senior Morning French Hour Curriculum",
+                                    detail: "Develop weekly conversational *Table Française* coffee circles for elders.",
+                                    substeps: [
+                                        "Establish weekly schedule for morning coffee and Cajun French conversation.",
+                                        "Procure traditional coffee maker and local pastry partnerships."
+                                    ]
+                                },
+                                {
+                                    title: "Design Youth Afterschool Immersion Program",
+                                    detail: "Establish weekend traditional music and language workshops for youth.",
+                                    substeps: [
+                                        "Draft curriculum for beginner Cajun accordion and fiddle youth camps.",
+                                        "Partner with local schools to distribute informational flyers."
+                                    ]
+                                }
+                            ],
+                            guidance: "Work directly with Council for the Development of French in Louisiana (CODOFIL) to source native French speakers and educational materials."
+                        }
+                    ]
+                },
+                {
+                    id: 3,
+                    title: "Level 3: Land & 100% USDA Financing",
+                    subtitle: "Zero-Down Rural Land Acquisition & Site Planning",
+                    cardClass: "card-level-3",
+                    fundingGoal: "$175,000 Direct Loan",
+                    theme: "land",
+                    quests: [
+                        {
+                            id: "q3_1",
+                            title: "Identify Rural Lafayette Parish Parcel (5–10 Acres)",
+                            xp: 70,
+                            desc: "Locate eligible parcel in unincorporated Lafayette Parish (Scott, Duson, Carencro).",
+                            actionItems: [
+                                {
+                                    title: "Filter Listings for A-1 Agricultural Zoning",
+                                    detail: "Scan real estate parcels in unincorporated Lafayette Parish.",
+                                    substeps: [
+                                        "Work with local real estate agent specializing in rural acreage.",
+                                        "Verify parcels sit strictly outside municipal city limits in unincorporated territory."
+                                    ]
+                                },
+                                {
+                                    title: "Verify Short-Term Rental (STR) Compliance",
+                                    detail: "Review parish zoning ordinances for unincorporated agritourism and lodging.",
+                                    substeps: [
+                                        "Consult Lafayette Parish Development and Planning Department.",
+                                        "Confirm agritourism exemptions for farm-stay micro-cabins on agricultural land."
+                                    ]
+                                },
+                                {
+                                    title: "Conduct Soil Percolation Test",
+                                    detail: "Hire certified sanitarian to test soil suitability for commercial septic treatment.",
+                                    substeps: [
+                                        "Hire local registered sanitarian for perc test.",
+                                        "Ensure soil report supports commercial septic system capacity for guest cabins."
+                                    ]
+                                }
+                            ],
+                            guidance: "Ensure parcel sits outside municipality boundaries to comply with USDA Community Facilities Direct Loan eligibility."
+                        },
+                        {
+                            id: "q3_2",
+                            title: "Apply for USDA Community Facilities Direct Loan",
+                            xp: 70,
+                            desc: "Secure 100% zero-down 40-year fixed loan for property purchase.",
+                            actionItems: [
+                                {
+                                    title: "Schedule USDA Rural Development Intake",
+                                    detail: "Meet with Lafayette USDA office loan specialist.",
+                                    substeps: [
+                                        "Contact USDA Rural Development office serving Acadiana region.",
+                                        "Schedule pre-application conference to review community facility eligibility."
+                                    ]
+                                },
+                                {
+                                    title: "Submit Form RD 1942-45 & Financial Projections",
+                                    detail: "Provide 3-year projected cash flow statements for the center.",
+                                    substeps: [
+                                        "Compile 3-year operating pro forma including Airbnb and workshop revenues.",
+                                        "Submit completed Form RD 1942-45 and organizational audit documents."
+                                    ]
+                                },
+                                {
+                                    title: "Complete Environmental Review Assessment",
+                                    detail: "Submit Form RD 1940-20 site impact questionnaire.",
+                                    substeps: [
+                                        "Fill out Form RD 1940-20 detailing cultural and environmental site impact.",
+                                        "Submit survey maps and flood zone determinations."
+                                    ]
+                                }
+                            ],
+                            guidance: "The USDA CF Direct Loan offers 100% financing with zero down payment for non-profit community facilities in rural areas."
+                        }
+                    ]
+                },
+                {
+                    id: 4,
+                    title: "Level 4: Clean Energy & Hydroponics",
+                    subtitle: "USDA REAP Solar Grid & Automated Greenhouse",
+                    cardClass: "card-level-4",
+                    fundingGoal: "$70,000 Grants",
+                    theme: "energy",
+                    quests: [
+                        {
+                            id: "q4_1",
+                            title: "Deploy 25 kW Solar Array & REAP Grant",
+                            xp: 75,
+                            desc: "Install solar microgrid and apply for 50% USDA REAP grant reimbursement.",
+                            actionItems: [
+                                {
+                                    title: "Contract Licensed Solar Vendor",
+                                    detail: "Secure engineering design and quote for 25 kW ground-mount array.",
+                                    substeps: [
+                                        "Obtain competitive bids from Louisiana-licensed solar contractors.",
+                                        "Select turn-key ground-mount array design optimized for agricultural energy load."
+                                    ]
+                                },
+                                {
+                                    title: "Submit USDA REAP Grant Application",
+                                    detail: "Apply during federal grant window for 50% equipment cost share.",
+                                    substeps: [
+                                        "Prepare REAP application package including vendor quotes and energy audit.",
+                                        "Submit application through USDA state energy coordinator portal."
+                                    ]
+                                },
+                                {
+                                    title: "Receive REAP Reimbursement Check",
+                                    detail: "Process federal grant payout to clear solar equipment financing.",
+                                    substeps: [
+                                        "Complete post-installation inspection with USDA officials.",
+                                        "Receive 50% grant disbursement directly to non-profit operating account."
+                                    ]
+                                }
+                            ],
+                            guidance: "Leverage REAP grants to cover 50% of off-grid solar equipment installation costs."
+                        },
+                        {
+                            id: "q4_2",
+                            title: "Assemble Automated Hydroponics Greenhouse",
+                            xp: 75,
+                            desc: "Construct DWC/RDWC hydroponic loops with automated dosing sensors.",
+                            actionItems: [
+                                {
+                                    title: "Erect 30x60ft Commercial High-Tunnel Frame",
+                                    detail: "Install greenhouse structure on leveled agricultural pad.",
+                                    substeps: [
+                                        "Prepare gravel pad and ground anchors for 30x60ft high-tunnel structure.",
+                                        "Assemble steel hoops and tension polycarbonate greenhouse film."
+                                    ]
+                                },
+                                {
+                                    title: "Install IoT Telemetry Sensors",
+                                    detail: "Wire automated pH, EC, and water temperature monitoring probes.",
+                                    substeps: [
+                                        "Mount industrial-grade water sensors in nutrient reservoirs.",
+                                        "Connect telemetry unit to solar-powered Wi-Fi router for remote alerts."
+                                    ]
+                                },
+                                {
+                                    title: "Apply for LDAF Specialty Crop Block Grant",
+                                    detail: "Submit non-matching state grant application ($35,000 ceiling).",
+                                    substeps: [
+                                        "Review Louisiana Department of Agriculture and Forestry grant guidelines.",
+                                        "Submit proposal highlighting hydroponic leafy green educational programs."
+                                    ]
+                                }
+                            ],
+                            guidance: "Automated hydroponics systems allow year-round yield with minimal daily labor requirements."
+                        }
+                    ]
+                },
+                {
+                    id: 5,
+                    title: "Level 5: Launch, Farm-Stay & Open Fund",
+                    subtitle: "3 Airbnb Cabins, Workshop Launch & Open-Ledger Auditing",
+                    cardClass: "card-level-5",
+                    fundingGoal: "$186,000 Annual Rev",
+                    theme: "launch",
+                    quests: [
+                        {
+                            id: "q5_1",
+                            title: "Build & Furnish 3 Micro-Lodging Cabins",
+                            xp: 90,
+                            desc: "Construct 3 authentic farm-stay cabins for Airbnb agritourism guests.",
+                            actionItems: [
+                                {
+                                    title: "Construct Timber Frame Micro-Cabins",
+                                    detail: "Build 3 rustic guest cabins using regional cypress/pine materials.",
+                                    substeps: [
+                                        "Pour concrete pier foundations for 3 micro-cabins.",
+                                        "Frame walls and install metal roofs reflecting classic Acadiana vernacular."
+                                    ]
+                                },
+                                {
+                                    title: "Interior Styling & Smart Access",
+                                    detail: "Furnish with local Acadiana folk art, artisan bedding, and keyless smart locks.",
+                                    substeps: [
+                                        "Install keypad smart locks connected to automated check-in software.",
+                                        "Decorate interiors with hand-woven Cajun quilts and local art prints."
+                                    ]
+                                },
+                                {
+                                    title: "Secure Lafayette Parish STR Annual License",
+                                    detail: "Register short-term rental permits with parish government.",
+                                    substeps: [
+                                        "Submit STR permit applications to Lafayette Parish permit office.",
+                                        "Pay annual operating fee and display emergency contact notices."
+                                    ]
+                                }
+                            ],
+                            guidance: "Cabins achieve 55% average occupancy at $150 ADR, generating ~$90,000 gross annual lodging revenue."
+                        },
+                        {
+                            id: "q5_2",
+                            title: "Publish Open-Ledger Dashboard for Donors",
+                            xp: 90,
+                            desc: "Deploy real-time transparent accounting system for public auditing.",
+                            actionItems: [
+                                {
+                                    title: "Integrate Bank API with Public Ledger",
+                                    detail: "Connect live accounting feed to public-facing transparency dashboard.",
+                                    substeps: [
+                                        "Set up read-only bank API integration for automated transaction logging.",
+                                        "Publish public web interface displaying real-time fund balance and audit hashes."
+                                    ]
+                                },
+                                {
+                                    title: "Publish Quarterly DSCR Reports",
+                                    detail: "Audit and publish debt-service coverage ratio metrics for transparency.",
+                                    substeps: [
+                                        "Calculate Debt Service Coverage Ratio (DSCR) at end of each quarter.",
+                                        "Publish certified financial review on project website."
+                                    ]
+                                },
+                                {
+                                    title: "Establish Community Apprentice Stipends",
+                                    detail: "Allocate net surplus funds into youth cultural arts apprentice grants.",
+                                    substeps: [
+                                        "Establish formal application guidelines for young Acadiana musicians and farmers.",
+                                        "Distribute quarterly stipend awards funded by net lodging surplus."
+                                    ]
+                                }
+                            ],
+                            guidance: "Maintain complete open-source financial transparency to validate mission-driven operations."
+                        }
+                    ]
+                }
+            ],
+            badges: [
+                { id: 'b1', title: 'Legal Pioneer', icon: 'fa-scale-balanced', desc: 'Incorporate 501(c)(3) Entity', unlocked: false },
+                { id: 'b2', title: 'Federal Ready', icon: 'fa-building-columns', desc: 'Secure SAM.gov UEI Number', unlocked: false },
+                { id: 'b3', title: 'Cultural Patron', icon: 'fa-guitar', desc: 'Partner with Acadiana Arts Council', unlocked: false },
+                { id: 'b4', title: 'Land Owner', icon: 'fa-map-location-dot', desc: 'Secure USDA Direct Land Loan', unlocked: false },
+                { id: 'b5', title: 'Solar Powered', icon: 'fa-solar-panel', desc: 'Deploy REAP Solar Array', unlocked: false },
+                { id: 'b6', title: 'Eco Farmer', icon: 'fa-seedling', desc: 'Build Automated Hydroponics', unlocked: false },
+                { id: 'b7', title: 'Superhost', icon: 'fa-house-chimney', desc: 'Launch 3 Airbnb Farm Cabins', unlocked: false },
+                { id: 'b8', title: 'Transparent Fund', icon: 'fa-eye', desc: 'Publish Open-Ledger Engine', unlocked: false }
+            ]
+        };
+
+        function newSetWithSaved() {
+            const saved = localStorage.getItem('acadiana_quest_save');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    return new Set(parsed.completedSubtasks || []);
+                } catch (e) { return new Set(); }
+            }
+            return new Set();
+        }
+
+        // AUDIO ENGINE
+        const AudioEngine = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playCheckSound() {
+                if (!GAME_DATA.audioEnabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            },
+            playBadgeSound() {
+                if (!GAME_DATA.audioEnabled) return;
+                this.init();
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + (idx * 0.08));
+                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime + (idx * 0.08));
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + (idx * 0.08) + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + (idx * 0.08));
+                    osc.stop(this.ctx.currentTime + (idx * 0.08) + 0.3);
+                });
+            }
+        };
+
+        function toggleAudio() {
+            GAME_DATA.audioEnabled = !GAME_DATA.audioEnabled;
+            const icon = document.getElementById('audio-icon');
+            if (GAME_DATA.audioEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-amber-400 text-xs';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-500 text-xs';
+            }
+        }
+
+        window.onload = function() {
+            loadLocalStorage();
+            renderLevelsAndQuests();
+            renderBadges();
+            renderLedger();
+            updateHUD();
+            initCanvas();
+            selectQuest('q1_1', 1);
+        };
+
+        function saveLocalStorage() {
+            const dataToSave = {
+                xp: GAME_DATA.xp,
+                completedQuests: Array.from(GAME_DATA.completedQuests),
+                completedSubtasks: Array.from(GAME_DATA.completedSubtasks),
+                ledger: GAME_DATA.ledger
+            };
+            localStorage.setItem('acadiana_quest_save', JSON.stringify(dataToSave));
+        }
+
+        function loadLocalStorage() {
+            const saved = localStorage.getItem('acadiana_quest_save');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    GAME_DATA.xp = parsed.xp || 0;
+                    GAME_DATA.completedQuests = new Set(parsed.completedQuests || []);
+                    GAME_DATA.completedSubtasks = new Set(parsed.completedSubtasks || []);
+                    if (parsed.ledger) GAME_DATA.ledger = parsed.ledger;
+                } catch (e) {
+                    console.error('Error loading save:', e);
+                }
+            }
+            checkBadgeUnlocks();
+        }
+
+        // RENDER SIDEBAR LEVELS & QUESTS
+        function renderLevelsAndQuests() {
+            const container = document.getElementById('levels-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            let totalQuestsCount = 0;
+            let totalApprovedCount = 0;
+
+            GAME_DATA.levels.forEach(level => {
+                const levelCard = document.createElement('div');
+                levelCard.className = `rounded-xl p-4 transition-all duration-300 ${level.cardClass}`;
+
+                let totalLevelSubsteps = 0;
+                let completedLevelSubsteps = 0;
+                let levelQuestsApproved = 0;
+
+                let questsHTML = '';
+                level.quests.forEach(quest => {
+                    totalQuestsCount++;
+                    const isQuestApproved = GAME_DATA.completedQuests.has(quest.id);
+                    if (isQuestApproved) {
+                        totalApprovedCount++;
+                        levelQuestsApproved++;
+                    }
+
+                    let questTotalSubsteps = 0;
+                    let questCompletedSubsteps = 0;
+
+                    if (quest.actionItems) {
+                        quest.actionItems.forEach((actionItem, aIdx) => {
+                            if (actionItem.substeps) {
+                                actionItem.substeps.forEach((_, sIdx) => {
+                                    questTotalSubsteps++;
+                                    totalLevelSubsteps++;
+                                    const subId = `${quest.id}_a${aIdx}_s${sIdx}`;
+                                    if (GAME_DATA.completedSubtasks.has(subId)) {
+                                        questCompletedSubsteps++;
+                                        completedLevelSubsteps++;
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+                    let questStatusText = "Action Required";
+                    let questStatusStyle = "text-amber-400 bg-amber-950/60 border-amber-800/60";
+                    
+                    if (isQuestApproved) {
+                        questStatusText = "Approved & Complete";
+                        questStatusStyle = "text-emerald-400 bg-emerald-950/60 border-emerald-800/60";
+                    } else if (questCompletedSubsteps > 0) {
+                        questStatusText = `In Progress (${questCompletedSubsteps}/${questTotalSubsteps})`;
+                        questStatusStyle = "text-blue-400 bg-blue-950/60 border-blue-800/60";
+                    }
+
+                    const isActive = (GAME_DATA.currentQuestId === quest.id);
+
+                    questsHTML += `
+                        <div onclick="selectQuest('${quest.id}', ${level.id})" 
+                             class="quest-item p-2.5 rounded-lg bg-slate-950/60 border border-slate-700/50 cursor-pointer flex items-center justify-between ${isActive ? 'active' : ''}">
+                            <div class="flex items-center gap-2.5">
+                                <i class="${isQuestApproved ? 'fa-solid fa-circle-check text-emerald-400' : 'fa-regular fa-circle text-slate-500'} text-sm"></i>
+                                <div>
+                                    <h4 class="text-xs font-semibold text-slate-200 leading-tight">${quest.title}</h4>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="text-[9px] px-1.5 py-0.2 rounded border font-mono-code font-bold uppercase ${questStatusStyle}">
+                                            ${questStatusText}
+                                        </span>
+                                        <span class="text-[10px] text-slate-400 font-mono-code">+${quest.xp} XP</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
+                        </div>
+                    `;
+                });
+
+                let levelStatusBadge = '<span class="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800 font-bold uppercase">Pending Filing</span>';
+                if (levelQuestsApproved === level.quests.length) {
+                    levelStatusBadge = '<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold uppercase">Approved & Active</span>';
+                } else if (completedLevelSubsteps > 0) {
+                    const pct = Math.round((completedLevelSubsteps / totalLevelSubsteps) * 100);
+                    levelStatusBadge = `<span class="text-[10px] px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800 font-bold uppercase">In Progress (${pct}%)</span>`;
+                }
+
+                levelCard.innerHTML = `
+                    <div class="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
+                        <div>
+                            <div class="flex items-center gap-2 mb-0.5">
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-amber-300">Stage Level ${level.id}</span>
+                                ${levelStatusBadge}
+                            </div>
+                            <h3 class="text-sm font-bold text-white font-cinzel">${level.title.split(':')[1] || level.title}</h3>
+                        </div>
+                        <span class="text-xs font-mono-code font-semibold px-2 py-0.5 rounded bg-black/40 text-emerald-300 border border-emerald-500/30">
+                            ${level.fundingGoal}
+                        </span>
+                    </div>
+                    <div class="space-y-2">
+                        ${questsHTML}
+                    </div>
+                `;
+
+                container.appendChild(levelCard);
+            });
+
+            const counterEl = document.getElementById('completion-counter');
+            if (counterEl) counterEl.innerText = `${totalApprovedCount}/${totalQuestsCount} Quests Approved`;
+        }
+
+        // QUEST SELECTION & DOSSIER DISPLAY
+        function selectQuest(questId, levelId) {
+            GAME_DATA.currentQuestId = questId;
+            GAME_DATA.currentLevelId = levelId;
+
+            const level = GAME_DATA.levels.find(l => l.id === levelId);
+            const quest = level.quests.find(q => q.id === questId);
+
+            const isApproved = GAME_DATA.completedQuests.has(quest.id);
+            
+            let totalSub = 0;
+            let compSub = 0;
+            if (quest.actionItems) {
+                quest.actionItems.forEach((ai, aIdx) => {
+                    if (ai.substeps) {
+                        ai.substeps.forEach((_, sIdx) => {
+                            totalSub++;
+                            if (GAME_DATA.completedSubtasks.has(`${quest.id}_a${aIdx}_s${sIdx}`)) compSub++;
+                        });
+                    }
+                });
+            }
+
+            document.getElementById('banner-level-tag').innerText = `Level ${level.id} Stage`;
+            document.getElementById('banner-title').innerText = quest.title;
+            document.getElementById('banner-subtitle').innerText = quest.desc;
+            document.getElementById('banner-funding').innerText = `${level.fundingGoal}`;
+
+            const bannerStatusTag = document.getElementById('banner-status-tag');
+            const dossierStatusTag = document.getElementById('dossier-quest-status');
+
+            if (isApproved) {
+                bannerStatusTag.className = "px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider bg-emerald-900/80 text-emerald-300 border border-emerald-500/40";
+                bannerStatusTag.innerText = "Status: Approved & Complete";
+
+                dossierStatusTag.className = "text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-emerald-950 text-emerald-400 border border-emerald-800";
+                dossierStatusTag.innerText = "Filing Approved";
+            } else if (compSub > 0) {
+                bannerStatusTag.className = "px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider bg-blue-900/80 text-blue-300 border border-blue-500/40";
+                bannerStatusTag.innerText = `Status: In Progress (${compSub}/${totalSub})`;
+
+                dossierStatusTag.className = "text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-blue-950 text-blue-400 border border-blue-800";
+                dossierStatusTag.innerText = "Pending Completion";
+            } else {
+                bannerStatusTag.className = "px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700";
+                bannerStatusTag.innerText = "Status: Action Required";
+
+                dossierStatusTag.className = "text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-amber-950 text-amber-400 border border-amber-800";
+                dossierStatusTag.innerText = "Action Required";
+            }
+
+            document.getElementById('action-dossier-card').classList.remove('hidden');
+            document.getElementById('dossier-title').innerText = quest.title;
+            document.getElementById('dossier-category').innerText = `Stage ${level.id} Quest • Reward: +${quest.xp} XP`;
+            document.getElementById('dossier-body').innerText = quest.guidance;
+
+            renderActionItems(quest);
+            renderLevelsAndQuests();
+            drawCanvasEnvironment(level.theme);
+        }
+
+        function renderActionItems(quest) {
+            const container = document.getElementById('action-items-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!quest.actionItems || quest.actionItems.length === 0) return;
+
+            let totalQuestSubsteps = 0;
+            let completedQuestSubsteps = 0;
+
+            // First pass to compute overall quest completion
+            quest.actionItems.forEach((actionItem, aIdx) => {
+                if (actionItem.substeps) {
+                    actionItem.substeps.forEach((_, sIdx) => {
+                        totalQuestSubsteps++;
+                        if (GAME_DATA.completedSubtasks.has(`${quest.id}_a${aIdx}_s${sIdx}`)) {
+                            completedQuestSubsteps++;
+                        }
+                    });
+                }
+            });
+
+            const overallPct = totalQuestSubsteps > 0 ? Math.round((completedQuestSubsteps / totalQuestSubsteps) * 100) : 0;
+
+            // Render overall progress bar at the top of the dossier
+            const overallHeader = document.createElement('div');
+            overallHeader.className = "bg-slate-950/90 border border-slate-800 rounded-xl p-3.5 mb-4";
+            overallHeader.innerHTML = `
+                <div class="flex justify-between items-center mb-1.5">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-300 font-cinzel">Main Quest Completion</span>
+                    <span id="overall-quest-pct" class="text-xs font-mono-code text-amber-400 font-bold">${completedQuestSubsteps}/${totalQuestSubsteps} Steps (${overallPct}%)</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800 shadow-inner">
+                    <div id="overall-quest-bar" class="h-full bg-gradient-to-r from-amber-500 to-emerald-400 transition-all duration-300" style="width: ${overallPct}%"></div>
+                </div>
+            `;
+            container.appendChild(overallHeader);
+
+            // Render each main quest item / objective block
+            quest.actionItems.forEach((actionItem, aIdx) => {
+                let aiTotal = actionItem.substeps ? actionItem.substeps.length : 0;
+                let aiComp = 0;
+                if (actionItem.substeps) {
+                    actionItem.substeps.forEach((_, sIdx) => {
+                        if (GAME_DATA.completedSubtasks.has(`${quest.id}_a${aIdx}_s${sIdx}`)) aiComp++;
+                    });
+                }
+                const aiPct = aiTotal > 0 ? Math.round((aiComp / aiTotal) * 100) : 0;
+
+                const itemWrapper = document.createElement('div');
+                itemWrapper.className = "bg-slate-950/80 border border-slate-800 rounded-xl p-4 shadow-md";
+
+                let substepsHTML = '';
+                if (actionItem.substeps) {
+                    actionItem.substeps.forEach((substepText, sIdx) => {
+                        const subId = `${quest.id}_a${aIdx}_s${sIdx}`;
+                        const isChecked = GAME_DATA.completedSubtasks.has(subId);
+
+                        substepsHTML += `
+                            <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 cursor-pointer transition-colors ${isChecked ? 'line-through text-slate-500' : 'text-slate-200'}">
+                                <input type="checkbox" onchange="toggleSubstep('${quest.id}', '${subId}')" ${isChecked ? 'checked' : ''} 
+                                       class="mt-0.5 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500 w-4 h-4 shrink-0">
+                                <span class="text-xs leading-normal">${substepText}</span>
+                            </label>
+                        `;
+                    });
+                }
+
+                itemWrapper.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 font-cinzel">${actionItem.title}</h4>
+                            <p class="text-xs text-slate-300 mt-0.5">${actionItem.detail}</p>
+                        </div>
+                        <span class="text-[10px] font-mono-code font-semibold px-2 py-0.5 rounded bg-slate-900 text-emerald-400 border border-slate-800">
+                            ${aiComp}/${aiTotal} (${aiPct}%)
+                        </span>
+                    </div>
+                    <!-- Main Quest Objective Progress Bar -->
+                    <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden my-2 border border-slate-800/60">
+                        <div class="h-full bg-emerald-500 transition-all duration-300" style="width: ${aiPct}%"></div>
+                    </div>
+                    <div class="space-y-2 mt-3 pt-3 border-t border-slate-900">
+                        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">Quest Objectives:</div>
+                        ${substepsHTML}
+                    </div>
+                `;
+                container.appendChild(itemWrapper);
+            });
+
+            const dossierStatusTag = document.getElementById('dossier-quest-status');
+
+            if (completedQuestSubsteps === totalQuestSubsteps && totalQuestSubsteps > 0) {
+                if (!GAME_DATA.completedQuests.has(quest.id)) {
+                    GAME_DATA.completedQuests.add(quest.id);
+                    GAME_DATA.xp += quest.xp;
+                    AudioEngine.playBadgeSound();
+                    checkBadgeUnlocks();
+                    updateHUD();
+                }
+                if (dossierStatusTag) {
+                    dossierStatusTag.className = "text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-emerald-950 text-emerald-400 border border-emerald-800";
+                    dossierStatusTag.innerText = "Filing Approved & Complete";
+                }
+            } else {
+                if (GAME_DATA.completedQuests.has(quest.id)) {
+                    GAME_DATA.completedQuests.delete(quest.id);
+                    GAME_DATA.xp = Math.max(0, GAME_DATA.xp - quest.xp);
+                    updateHUD();
+                }
+                if (dossierStatusTag) {
+                    if (completedQuestSubsteps > 0) {
+                        dossierStatusTag.className = "text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-blue-950 text-blue-400 border border-blue-800";
+                        dossierStatusTag.innerText = `Pending Completion (${completedQuestSubsteps}/${totalQuestSubsteps})`;
+                    } else {
+                        dossierStatusTag.className = "text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-amber-950 text-amber-400 border border-amber-800";
+                        dossierStatusTag.innerText = "Action Required";
+                    }
+                }
+            }
+        }
+
+        function toggleSubstep(questId, subId) {
+            AudioEngine.playCheckSound();
+
+            if (GAME_DATA.completedSubtasks.has(subId)) {
+                GAME_DATA.completedSubtasks.delete(subId);
+            } else {
+                GAME_DATA.completedSubtasks.add(subId);
+            }
+
+            saveLocalStorage();
+
+            const level = GAME_DATA.levels.find(l => l.id === GAME_DATA.currentLevelId);
+            const quest = level.quests.find(q => q.id === questId);
+            renderActionItems(quest);
+            renderLevelsAndQuests();
+            selectQuest(quest.id, level.id);
+        }
+
+        function hideDossierDetails() {
+            document.getElementById('action-dossier-card').classList.add('hidden');
+        }
+
+        // COLLAPSIBLE MODULE TOGGLES
+        function toggleLedgerPanel() {
+            GAME_DATA.ledgerVisible = !GAME_DATA.ledgerVisible;
+            const panel = document.getElementById('ledger-panel');
+            const toggleBtn = document.getElementById('toggle-ledger-btn');
+
+            if (GAME_DATA.ledgerVisible) {
+                panel.classList.remove('hidden');
+                toggleBtn.className = "px-2.5 py-1 rounded bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 text-xs font-medium flex items-center gap-1.5 transition-all";
+            } else {
+                panel.classList.add('hidden');
+                toggleBtn.className = "px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 text-xs font-medium flex items-center gap-1.5 transition-all";
+            }
+        }
+
+        function toggleBadgesPanel() {
+            GAME_DATA.badgesVisible = !GAME_DATA.badgesVisible;
+            const panel = document.getElementById('badges-panel');
+            const toggleBtn = document.getElementById('toggle-badges-btn');
+
+            if (GAME_DATA.badgesVisible) {
+                panel.classList.remove('hidden');
+                toggleBtn.className = "px-2.5 py-1 rounded bg-amber-950/60 hover:bg-amber-900 text-amber-200 text-xs font-medium flex items-center gap-1.5 transition-all";
+            } else {
+                panel.classList.add('hidden');
+                toggleBtn.className = "px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 text-xs font-medium flex items-center gap-1.5 transition-all";
+            }
+        }
+
+        // OPEN-LEDGER ENGINE
+        function renderLedger() {
+            const tbody = document.getElementById('ledger-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            let totalBalance = 0;
+
+            GAME_DATA.ledger.forEach((tx) => {
+                totalBalance += tx.amount;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition-colors';
+
+                const isPositive = tx.amount >= 0;
+                const amtClass = isPositive ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+                const formattedAmt = `${isPositive ? '+' : ''}$${Math.abs(tx.amount).toLocaleString()}`;
+
+                tr.innerHTML = `
+                    <td class="p-2.5 text-slate-400">${tx.date}</td>
+                    <td class="p-2.5 text-slate-200 font-semibold">${tx.desc}</td>
+                    <td class="p-2.5">
+                        <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${getCategoryBadge(tx.category)}">
+                            ${tx.category}
+                        </span>
+                    </td>
+                    <td class="p-2.5 text-right ${amtClass}">${formattedAmt}</td>
+                    <td class="p-2.5 text-center">
+                        <button onclick="removeLedgerTx('${tx.id}')" class="text-slate-500 hover:text-rose-400 transition-colors" title="Delete Transaction">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('hud-balance').innerText = `$${totalBalance.toLocaleString()}`;
+        }
+
+        function getCategoryBadge(cat) {
+            switch (cat) {
+                case 'grant': return 'bg-emerald-950 text-emerald-400 border border-emerald-800';
+                case 'lodging': return 'bg-purple-950 text-purple-400 border border-purple-800';
+                case 'workshop': return 'bg-amber-950 text-amber-400 border border-amber-800';
+                case 'expense': return 'bg-rose-950 text-rose-400 border border-rose-800';
+                default: return 'bg-slate-800 text-slate-300';
+            }
+        }
+
+        function handleAddTransaction(e) {
+            e.preventDefault();
+            const desc = document.getElementById('tx-desc').value.trim();
+            const rawAmt = parseFloat(document.getElementById('tx-amount').value);
+            const category = document.getElementById('tx-type').value;
+
+            if (!desc || isNaN(rawAmt)) return;
+
+            const finalAmt = (category === 'expense') ? -Math.abs(rawAmt) : Math.abs(rawAmt);
+            const today = new Date().toISOString().split('T')[0];
+
+            GAME_DATA.ledger.unshift({
+                id: `tx-${Date.now()}`,
+                date: today,
+                desc: desc,
+                category: category,
+                amount: finalAmt
+            });
+
+            saveLocalStorage();
+            renderLedger();
+            AudioEngine.playCheckSound();
+
+            document.getElementById('tx-desc').value = '';
+            document.getElementById('tx-amount').value = '';
+        }
+
+        function removeLedgerTx(id) {
+            GAME_DATA.ledger = GAME_DATA.ledger.filter(tx => tx.id !== id);
+            saveLocalStorage();
+            renderLedger();
+            AudioEngine.playCheckSound();
+        }
+
+        function resetLedger() {
+            GAME_DATA.ledger = [
+                { id: 'tx-1', date: '2026-02-15', desc: 'LDAF Specialty Crop Grant Deposit', category: 'grant', amount: 35000 },
+                { id: 'tx-2', date: '2026-03-01', desc: 'Cabin 1 Airbnb Booking - Weekend Stay', category: 'lodging', amount: 320 },
+                { id: 'tx-3', date: '2026-03-04', desc: 'Cajun Fiddle Workshop Registration Fees', category: 'workshop', amount: 450 }
+            ];
+            saveLocalStorage();
+            renderLedger();
+            AudioEngine.playCheckSound();
+        }
+
+        // BADGES
+        function checkBadgeUnlocks() {
+            if (GAME_DATA.completedQuests.has('q1_1')) unlockBadge('b1');
+            if (GAME_DATA.completedQuests.has('q1_2')) unlockBadge('b2');
+            if (GAME_DATA.completedQuests.has('q2_1')) unlockBadge('b3');
+            if (GAME_DATA.completedQuests.has('q3_2')) unlockBadge('b4');
+            if (GAME_DATA.completedQuests.has('q4_1')) unlockBadge('b5');
+            if (GAME_DATA.completedQuests.has('q4_2')) unlockBadge('b6');
+            if (GAME_DATA.completedQuests.has('q5_1')) unlockBadge('b7');
+            if (GAME_DATA.completedQuests.has('q5_2')) unlockBadge('b8');
+        }
+
+        function unlockBadge(id) {
+            const badge = GAME_DATA.badges.find(b => b.id === id);
+            if (badge && !badge.unlocked) {
+                badge.unlocked = true;
+                renderBadges();
+            }
+        }
+
+        function renderBadges() {
+            const grid = document.getElementById('badges-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            GAME_DATA.badges.forEach(badge => {
+                const el = document.createElement('div');
+                el.className = `p-3 rounded-xl border flex flex-col items-center text-center transition-all ${
+                    badge.unlocked 
+                        ? 'bg-amber-950/40 border-amber-500/60 shadow-lg shadow-amber-500/10' 
+                        : 'bg-slate-950/50 border-slate-800 opacity-40 grayscale'
+                }`;
+                el.innerHTML = `
+                    <div class="w-10 h-10 rounded-full ${badge.unlocked ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-800 text-slate-500'} flex items-center justify-center text-lg mb-2">
+                        <i class="fa-solid ${badge.icon}"></i>
+                    </div>
+                    <h4 class="text-xs font-bold text-slate-200">${badge.title}</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5 leading-tight">${badge.desc}</p>
+                `;
+                grid.appendChild(el);
+            });
+        }
+
+        function updateHUD() {
+            document.getElementById('xp-text').innerText = `${GAME_DATA.xp} / 500 XP`;
+            const pct = Math.min(100, Math.round((GAME_DATA.xp / 500) * 100));
+            document.getElementById('xp-bar').style.width = `${pct}%`;
+        }
+
+        // CANVAS BACKGROUND RENDERER
+        let canvas, ctx;
+
+        function initCanvas() {
+            canvas = document.getElementById('stageCanvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            drawCanvasEnvironment('legal');
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const currentLevel = GAME_DATA.levels.find(l => l.id === GAME_DATA.currentLevelId);
+            if (currentLevel) drawCanvasEnvironment(currentLevel.theme);
+        }
+
+        function drawCanvasEnvironment(theme) {
+            if (!ctx || !canvas) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const w = canvas.width;
+            const h = canvas.height;
+
+            switch (theme) {
+                case 'legal':
+                    ctx.strokeStyle = 'rgba(59, 130, 246, 0.08)';
+                    ctx.lineWidth = 1;
+                    for (let x = 0; x < w; x += 40) {
+                        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+                    }
+                    for (let y = 0; y < h; y += 40) {
+                        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                    }
+                    ctx.strokeStyle = 'rgba(245, 158, 11, 0.12)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(w * 0.7, h * 0.5, 180, 0, Math.PI * 2);
+                    ctx.stroke();
+                    break;
+
+                case 'cultural':
+                    ctx.fillStyle = 'rgba(249, 115, 22, 0.03)';
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.strokeStyle = 'rgba(249, 115, 22, 0.1)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    for (let x = 0; x < w; x += 20) {
+                        ctx.moveTo(x, h * 0.3 + Math.sin(x * 0.01) * 30);
+                        ctx.lineTo(x + 10, h * 0.7 + Math.cos(x * 0.01) * 30);
+                    }
+                    ctx.stroke();
+                    break;
+
+                case 'land':
+                    ctx.strokeStyle = 'rgba(34, 197, 94, 0.08)';
+                    ctx.lineWidth = 1.5;
+                    for (let r = 50; r < 600; r += 60) {
+                        ctx.beginPath();
+                        ctx.arc(w * 0.65, h * 0.45, r, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                    break;
+
+                case 'energy':
+                    ctx.strokeStyle = 'rgba(20, 184, 166, 0.12)';
+                    ctx.lineWidth = 1;
+                    for (let x = 0; x < w; x += 60) {
+                        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+                    }
+                    ctx.fillStyle = 'rgba(20, 184, 166, 0.3)';
+                    for (let x = 60; x < w; x += 180) {
+                        for (let y = 60; y < h; y += 180) {
+                            ctx.beginPath();
+                            ctx.arc(x, y, 4, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                    break;
+
+                case 'launch':
+                    ctx.strokeStyle = 'rgba(168, 85, 247, 0.15)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 80);
+                    ctx.quadraticCurveTo(w * 0.5, 180, w, 80);
+                    ctx.stroke();
+
+                    for (let i = 0.1; i < 1.0; i += 0.1) {
+                        const lx = w * i;
+                        const ly = 80 + Math.sin(i * Math.PI) * 50;
+                        ctx.fillStyle = 'rgba(253, 224, 71, 0.6)';
+                        ctx.beginPath();
+                        ctx.arc(lx, ly, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
